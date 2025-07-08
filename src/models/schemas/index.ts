@@ -1,0 +1,9 @@
+export { UserProfile, UserProfileSchema } from './user-profile.schema';
+export { ArtistProfile, ArtistProfileSchema } from './artist-profile.schema';
+export { ManagerProfile, ManagerProfileSchema } from './manager-profile.schema';
+export { AlbumMetadata, AlbumMetadataSchema } from './album-metadata.schema';
+export { SongMetadata, SongMetadataSchema } from './song-metadata.schema';
+export { EventDetails, EventDetailsSchema } from './event-details.schema';
+export { AcquisitionDocuments, AcquisitionDocumentsSchema } from './acquisition-documents.schema';
+export { AnalyticsData, AnalyticsDataSchema } from './analytics-data.schema';
+export { ContentModeration, ContentModerationSchema } from './content-moderation.schema';
