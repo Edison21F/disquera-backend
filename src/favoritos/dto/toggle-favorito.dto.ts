@@ -1,10 +1,6 @@
 import { IsNotEmpty, IsNumber, IsString, IsEnum } from 'class-validator';
 
-export class CreateFavoritoDto {
-  @IsNotEmpty()
-  @IsNumber()
-  id_usuario: number;
-
+export class ToggleFavoritoDto {
   @IsNotEmpty()
   @IsNumber()
   id_producto: number;

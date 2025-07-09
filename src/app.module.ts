@@ -19,19 +19,13 @@ import { TransaccionesModule } from './transacciones/transacciones.module';
 import { FavoritosModule } from './favoritos/favoritos.module';
 import { ComentariosModule } from './comentarios/comentarios.module';
 import { ResenasModule } from './resenas/resenas.module';
-import { NotificacionesModule } from './notificaciones/notificaciones.module';
 import { EstadosModule } from './estados/estados.module';
 import { RolesModule } from './roles/roles.module';
 import { PaisesModule } from './paises/paises.module';
 import { SexosModule } from './sexos/sexos.module';
 import { MetodosPagosModule } from './metodos-pagos/metodos-pagos.module';
 import { PromocionesModule } from './promociones/promociones.module';
-import { ConfiguracionesModule } from './configuraciones/configuraciones.module';
-import { ArtistasAdquiridosModule } from './artistas-adquiridos/artistas-adquiridos.module';
-import { HistorialVentasModule } from './historial-ventas/historial-ventas.module';
-import { EventMetadataModule } from './event-metadata/event-metadata.module';
-import { UserProfilesModule } from './user-profiles/user-profiles.module';
-import { AnalyticsModule } from './analytics/analytics.module';
+
 
 @Module({
   imports: [
@@ -53,19 +47,13 @@ import { AnalyticsModule } from './analytics/analytics.module';
     FavoritosModule,
     ComentariosModule,
     ResenasModule,
-    NotificacionesModule,
     EstadosModule,
     RolesModule,
     PaisesModule,
     SexosModule,
     MetodosPagosModule,
     PromocionesModule,
-    ConfiguracionesModule,
-    ArtistasAdquiridosModule,
-    HistorialVentasModule,
-    EventMetadataModule,
-    UserProfilesModule,
-    AnalyticsModule
+
   ],
   controllers: [AppController],
   providers: [AppService],
