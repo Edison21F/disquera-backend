@@ -57,20 +57,24 @@ export class RolesService {
     await this.roleRepository.remove(role);
   }
 
-  // Método para inicializar roles por defecto
-  async initializeDefaultRoles(): Promise<void> {
-    const defaultRoles = [
-      { nombre_rol: 'Admin', description: 'Administrador del sistema' },
-      { nombre_rol: 'Manager', description: 'Manager de artistas' },
-      { nombre_rol: 'Usuario', description: 'Usuario final' },
-      { nombre_rol: 'Artista', description: 'Artista registrado' }
-    ];
+ // Método para inicializar roles por defecto
+async initializeDefaultRoles(): Promise<void> {
+  const defaultRoles = [
+    { nombre_rol: 'Admin', description: 'Administrador del sistema' },
+    { nombre_rol: 'Manager', description: 'Manager de artistas' },
+    { nombre_rol: 'Usuario', description: 'Usuario final' },
+    { nombre_rol: 'Artista', description: 'Artista registrado' }
+  ];
 
-    for (const roleData of defaultRoles) {
-      const existingRole = await this.findByName(roleData.nombre_rol);
-      if (!existingRole) {
-        await this.create(roleData);
-      }
+  for (const roleData of defaultRoles) {
+    const existingRole = await this.roleRepository.findOne({
+      where: { nombre_rol: roleData.nombre_rol }
+    });
+    
+    if (!existingRole) {
+      await this.create(roleData);
     }
   }
+}
+
 }

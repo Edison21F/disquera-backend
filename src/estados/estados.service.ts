@@ -55,24 +55,29 @@ export class EstadosService {
     await this.estadoRepository.remove(estado);
   }
 
-  // Método para inicializar estados por defecto
-  async initializeDefaultStates(): Promise<void> {
-    const defaultStates = [
-      { descripcion: 'Activo' },
-      { descripcion: 'Inactivo' },
-      { descripcion: 'Pendiente' },
-      { descripcion: 'Suspendido' },
-      { descripcion: 'Eliminado' },
-      { descripcion: 'En Proceso' },
-      { descripcion: 'Completado' },
-      { descripcion: 'Cancelado' }
-    ];
+  
+ // Método para inicializar estados por defecto
+async initializeDefaultStates(): Promise<void> {
+  const defaultStates = [
+    { descripcion: 'Activo' },
+    { descripcion: 'Inactivo' },
+    { descripcion: 'Pendiente' },
+    { descripcion: 'Suspendido' },
+    { descripcion: 'Eliminado' },
+    { descripcion: 'En Proceso' },
+    { descripcion: 'Completado' },
+    { descripcion: 'Cancelado' }
+  ];
 
-    for (const stateData of defaultStates) {
-      const existingState = await this.findByDescription(stateData.descripcion);
-      if (!existingState) {
-        await this.create(stateData);
-      }
+  for (const stateData of defaultStates) {
+    const existingState = await this.estadoRepository.findOne({
+      where: { descripcion: stateData.descripcion }
+    });
+    
+    if (!existingState) {
+      await this.create(stateData);
     }
   }
+}
+
 }

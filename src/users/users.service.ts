@@ -110,15 +110,18 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<Usuario> {
-    const user = await this.userRepository.findOne({
-      where: { correo: email },
-      relations: ['estado', 'rol', 'sexo', 'pais'],
-    });
-    if (!user) {
-      throw new NotFoundException(`Usuario con correo ${email} no encontrado`);
-    }
-    return user;
+  const user = await this.userRepository.findOne({
+    where: { correo: email },
+    relations: ['estado', 'rol', 'sexo', 'pais'], // 👈 asegúrate de incluir 'rol'
+  });
+
+  if (!user) {
+    throw new NotFoundException(`Usuario con correo ${email} no encontrado`);
   }
+
+  return user;
+}
+
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponse> {
     const user = await this.userRepository.findOne({
@@ -239,10 +242,19 @@ export class UsersService {
   }
 
   async validateUser(email: string, password: string): Promise<Usuario | null> {
+  try {
     const user = await this.findByEmail(email);
-    if (user && await bcrypt.compare(password, user.contrasena)) {
-      return user;
+
+    const isPasswordValid = await bcrypt.compare(password, user.contrasena);
+    return isPasswordValid ? user : null;
+
+  } catch (error) {
+    // Si el usuario no se encuentra, retornar null en vez de lanzar una excepción
+    if (error instanceof NotFoundException) {
+      return null;
     }
-    return null;
+    throw error; // Lanza otras excepciones no relacionadas
   }
+}
+
 }
