@@ -1,5 +1,9 @@
+// src/app.module.ts (VERSIÓN ACTUALIZADA)
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 import { LoggingMiddleware } from './common/middleware/logging.middleware';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { HealthModule } from './common/health/health.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -27,13 +31,18 @@ import { SexosModule } from './sexos/sexos.module';
 import { MetodosPagosModule } from './metodos-pagos/metodos-pagos.module';
 import { PromocionesModule } from './promociones/promociones.module';
 
-
 @Module({
   imports: [
+    // Configuración de base de datos con logging mejorado
     TypeOrmModule.forRoot(typeOrmConfig),
     MongooseModule.forRootAsync({
-      useFactory:() => mongooseConfig
+      useFactory: () => mongooseConfig
     }),
+    
+    // Módulo de health check
+    HealthModule,
+    
+    // Módulos de la aplicación
     AuthModule,
     UsersModule,
     ArtistasModule,
@@ -54,15 +63,21 @@ import { PromocionesModule } from './promociones/promociones.module';
     SexosModule,
     MetodosPagosModule,
     PromocionesModule,
-
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Filtro global de excepciones
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+  ],
 })
-export class AppModule implements NestModule{
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(LoggingMiddleware)
-      .forRoutes('*'); // Apply to all routes
+      .forRoutes('*'); // Aplicar a todas las rutas
   }
 }

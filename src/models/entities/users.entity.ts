@@ -19,7 +19,7 @@ export class Usuario {
     correo: string;
 
     @Column()
-    contraseña: string;
+    contrasena: string;
 
     @ManyToOne(() => Estado)
     estado: Estado;

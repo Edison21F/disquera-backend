@@ -15,7 +15,7 @@ export class RegisterDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(6)
-  contraseña: string;
+  contrasena: string;
 
   @IsOptional()
   @IsString()

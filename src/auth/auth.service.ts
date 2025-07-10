@@ -15,15 +15,15 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.validateUser(email, password);
-    if (user) {
-      const { contraseña, ...result } = user;
-      return result;
+    if (user) { 
+      const { contrasena, ...result } = user;
+      return result;  
     }
     return null;
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponse> {
-    const user = await this.usersService.validateUser(loginDto.correo, loginDto.contraseña);
+    const user = await this.usersService.validateUser(loginDto.correo, loginDto.contrasena);
     
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
@@ -53,7 +53,7 @@ export class AuthService {
         nombre: registerDto.nombre,
         apellido: registerDto.apellido,
         correo: registerDto.correo,
-        contraseña: registerDto.contraseña,
+        contrasena: registerDto.contrasena,
         profesion: registerDto.profesion,
         id_rol: 3, // Rol "Usuario" por defecto
         id_estado: 1, // Estado "Activo" por defecto

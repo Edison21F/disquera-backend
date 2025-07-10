@@ -8,7 +8,7 @@ export const mongooseConfig: MongooseModuleOptions = {
   autoIndex: true,
   connectTimeoutMS: 10000,
   socketTimeoutMS: 30000,
-  dbName: 'event_metadata',
+  dbName: 'indiec_metadata',
   connectionFactory: (connection) => {
     connection.on('connected', () => {
       console.log('✅ Conexión con MongoDB exitosa');

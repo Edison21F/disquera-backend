@@ -30,15 +30,15 @@ export class UsersService {
       throw new ConflictException('El correo electrónico ya está registrado');
     }
 
-    // Hash de la contraseña
-    const hashedPassword = await bcrypt.hash(createUserDto.contraseña, 10);
+    // Hash de la contrasena
+    const hashedPassword = await bcrypt.hash(createUserDto.contrasena, 10);
 
     // Crear usuario en MySQL
     const user = this.userRepository.create({
       nombre: createUserDto.nombre,
       apellido: createUserDto.apellido,
       correo: createUserDto.correo,
-      contraseña: hashedPassword,
+      contrasena: hashedPassword,
       fecha_registro: new Date(),
     });
 
@@ -137,9 +137,9 @@ export class UsersService {
     if (updateUserDto.apellido !== undefined) updateData.apellido = updateUserDto.apellido;
     if (updateUserDto.correo !== undefined) updateData.correo = updateUserDto.correo;
 
-    // Si se actualiza la contraseña, hashearla
-    if (updateUserDto.contraseña) {
-      updateData.contraseña = await bcrypt.hash(updateUserDto.contraseña, 10);
+    // Si se actualiza la contrasena, hashearla
+    if (updateUserDto.contrasena) {
+      updateData.contrasena = await bcrypt.hash(updateUserDto.contrasena, 10);
     }
 
     // Relaciones - Solo actualizar si se proporcionan
@@ -240,7 +240,7 @@ export class UsersService {
 
   async validateUser(email: string, password: string): Promise<Usuario | null> {
     const user = await this.findByEmail(email);
-    if (user && await bcrypt.compare(password, user.contraseña)) {
+    if (user && await bcrypt.compare(password, user.contrasena)) {
       return user;
     }
     return null;

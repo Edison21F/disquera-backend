@@ -1,4 +1,4 @@
-// src/config/logging.config.ts
+// src/config/logging.config.ts (VERSIÓN MEJORADA)
 
 import * as winston from 'winston';
 import * as moment from 'moment-timezone';
@@ -25,47 +25,115 @@ const logFormat = winston.format.printf(({ level, message, timestamp, stack, ...
   }
 
   if (metadata && Object.keys(metadata).length) {
-    msg += ` | Meta: ${JSON.stringify(metadata)}`;
+    msg += `\nMetadata: ${JSON.stringify(metadata, null, 2)}`;
   }
 
   return msg;
 });
 
+// Formato compacto para errores críticos
+const errorFormat = winston.format.printf(({ level, message, timestamp, stack, ...metadata }) => {
+  const basic = `${timestamp} [${level.toUpperCase()}] ${message}`;
+  
+  if (level === 'error' && stack) {
+    return `${basic}\n${stack}\n${'-'.repeat(80)}`;
+  }
+  
+  if (metadata && Object.keys(metadata).length) {
+    return `${basic}\n${JSON.stringify(metadata, null, 2)}\n${'-'.repeat(40)}`;
+  }
+  
+  return basic;
+});
+
 // Crear el logger principal
 export const logger = winston.createLogger({
-  level: 'info',
+  level: key.app.env === 'production' ? 'info' : 'debug',
   format: winston.format.combine(
     winston.format.timestamp({ format: ecuadorTime }),
     winston.format.errors({ stack: true }),
     winston.format.splat(),
-    winston.format.json(),
-    logFormat
+    winston.format.json()
   ),
   transports: [
-    // Solo archivo - TODO SE GUARDA EN app.log
+    // Archivo principal - TODOS los logs
     new winston.transports.File({
       filename: path.join(logsDir, 'app.log'),
-      level: 'debug', // Capturar desde debug hacia arriba
+      level: 'debug',
       handleExceptions: true,
       handleRejections: true,
-      maxsize: 10 * 1024 * 1024, // 10MB por archivo
-      maxFiles: 5, // Mantener 5 archivos rotados
-      tailable: true
+      maxsize: 20 * 1024 * 1024, // 20MB por archivo
+      maxFiles: 10, // Mantener 10 archivos rotados
+      tailable: true,
+      format: winston.format.combine(
+        winston.format.timestamp({ format: ecuadorTime }),
+        logFormat
+      )
+    }),
+    
+    // Archivo específico para errores
+    new winston.transports.File({
+      filename: path.join(logsDir, 'app.log'),
+      level: 'error',
+      handleExceptions: true,
+      handleRejections: true,
+      maxsize: 10 * 1024 * 1024, // 10MB
+      maxFiles: 5,
+      format: winston.format.combine(
+        winston.format.timestamp({ format: ecuadorTime }),
+        errorFormat
+      )
+    }),
+
+    // Archivo para requests HTTP
+    new winston.transports.File({
+      filename: path.join(logsDir, 'app.log'),
+      level: 'info',
+      maxsize: 15 * 1024 * 1024, // 15MB
+      maxFiles: 7,
+      format: winston.format.combine(
+        winston.format.timestamp({ format: ecuadorTime }),
+        winston.format.printf(({ timestamp, level, message, ...meta }) => {
+          if (typeof message === 'string' && (message.includes('🔵') || message.includes('🟢') || message.includes('🔴'))) {
+            return `${timestamp} ${message}${meta && Object.keys(meta).length ? ' | ' + JSON.stringify(meta) : ''}`;
+          }
+          return ''; // Filtrar solo requests HTTP, pero siempre retorna string
+        }),
+        winston.format((info) => info.message ? info : false)()
+      )
     })
   ],
   exitOnError: false,
+  
   // Capturar excepciones no manejadas
   exceptionHandlers: [
     new winston.transports.File({
       filename: path.join(logsDir, 'app.log'),
-      handleExceptions: true
+      handleExceptions: true,
+      maxsize: 5 * 1024 * 1024,
+      maxFiles: 3,
+      format: winston.format.combine(
+        winston.format.timestamp({ format: ecuadorTime }),
+        winston.format.printf(({ timestamp, level, message, stack }) => {
+          return `${timestamp} [UNCAUGHT EXCEPTION] ${message}\n${stack}\n${'='.repeat(100)}`;
+        })
+      )
     })
   ],
+  
   // Capturar promesas rechazadas
   rejectionHandlers: [
     new winston.transports.File({
       filename: path.join(logsDir, 'app.log'),
-      handleRejections: true
+      handleRejections: true,
+      maxsize: 5 * 1024 * 1024,
+      maxFiles: 3,
+      format: winston.format.combine(
+        winston.format.timestamp({ format: ecuadorTime }),
+        winston.format.printf(({ timestamp, level, message, stack }) => {
+          return `${timestamp} [UNHANDLED REJECTION] ${message}\n${stack}\n${'='.repeat(100)}`;
+        })
+      )
     })
   ]
 });
@@ -78,7 +146,13 @@ if (key.app.env !== 'production') {
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.timestamp({ format: ecuadorTime }),
-        logFormat
+        winston.format.printf(({ timestamp, level, message, ...meta }) => {
+          let output = `${timestamp} ${level}: ${message}`;
+          if (Object.keys(meta).length) {
+            output += `\n${JSON.stringify(meta, null, 2)}`;
+          }
+          return output;
+        })
       ),
     })
   );
@@ -86,7 +160,7 @@ if (key.app.env !== 'production') {
 
 // Logger específico para errores de base de datos
 export const dbLogger = winston.createLogger({
-  level: 'error',
+  level: 'debug',
   format: winston.format.combine(
     winston.format.timestamp({ format: ecuadorTime }),
     winston.format.errors({ stack: true }),
@@ -98,38 +172,48 @@ export const dbLogger = winston.createLogger({
       }
       
       if (meta && Object.keys(meta).length) {
-        logMsg += `\nDatabase Meta: ${JSON.stringify(meta, null, 2)}`;
+        logMsg += `\nDatabase Details: ${JSON.stringify(meta, null, 2)}`;
       }
       
-      return logMsg;
+      return logMsg + '\n' + '-'.repeat(80);
     })
   ),
   transports: [
+    // Archivo específico para base de datos
     new winston.transports.File({
       filename: path.join(logsDir, 'app.log'),
-      level: 'error'
+      level: 'debug',
+      maxsize: 15 * 1024 * 1024,
+      maxFiles: 5,
+    }),
+    
+    // También en el archivo principal
+    new winston.transports.File({
+      filename: path.join(logsDir, 'app.log'),
+      level: 'error' // Solo errores de DB en app.log
     })
   ]
 });
 
-// Logger específico para TypeORM
-export const typeormLogger = winston.createLogger({
-  level: 'error',
+// Logger para performance y métricas
+export const performanceLogger = winston.createLogger({
+  level: 'info',
   format: winston.format.combine(
     winston.format.timestamp({ format: ecuadorTime }),
-    winston.format.printf(({ timestamp, level, message, ...meta }) => {
-      return `${timestamp} [TYPEORM-${level.toUpperCase()}] ${message} ${meta ? JSON.stringify(meta) : ''}`;
+    winston.format.printf(({ timestamp, message, ...meta }) => {
+      return `${timestamp} [PERFORMANCE] ${message} | ${JSON.stringify(meta)}`;
     })
   ),
   transports: [
     new winston.transports.File({
       filename: path.join(logsDir, 'app.log'),
-      level: 'debug'
+      maxsize: 10 * 1024 * 1024,
+      maxFiles: 3,
     })
   ]
 });
 
-// Interceptar console.log, console.error, etc. para redirigir a app.log
+// Interceptar console.log, console.error, etc. para redirigir a archivos
 const originalConsole = {
   log: console.log,
   error: console.error,
@@ -161,6 +245,26 @@ if (key.app.env === 'production') {
   };
 }
 
+// Función para loggear el inicio de la aplicación
+export const logAppStart = () => {
+  logger.info('🚀 Aplicación iniciando...', {
+    environment: key.app.env,
+    pid: key.app.pid,
+    nodeVersion: process.version,
+    platform: process.platform,
+    memory: process.memoryUsage(),
+  });
+};
+
+// Función para loggear el cierre de la aplicación
+export const logAppShutdown = (signal?: string) => {
+  logger.info('🛑 Aplicación cerrándose...', {
+    signal: signal || 'UNKNOWN',
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+  });
+};
+
 // Restaurar console original si es necesario
 export const restoreConsole = () => {
   console.log = originalConsole.log;
@@ -169,3 +273,25 @@ export const restoreConsole = () => {
   console.debug = originalConsole.debug;
   console.info = originalConsole.info;
 };
+
+// Manejo de señales del proceso
+process.on('SIGTERM', () => {
+  logAppShutdown('SIGTERM');
+});
+
+process.on('SIGINT', () => {
+  logAppShutdown('SIGINT');
+});
+
+// Log de memoria cada 30 minutos en producción
+if (key.app.env === 'production') {
+  setInterval(() => {
+    const memoryUsage = process.memoryUsage();
+    if (memoryUsage.heapUsed > 500 * 1024 * 1024) { // Si usa más de 500MB
+      performanceLogger.warn('Alto uso de memoria detectado', {
+        memory: memoryUsage,
+        uptime: process.uptime(),
+      });
+    } 
+  }, 30 * 60 * 1000); // 30 minutos
+}
