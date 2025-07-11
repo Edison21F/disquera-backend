@@ -31,6 +31,7 @@ import { SexosModule } from './sexos/sexos.module';
 import { MetodosPagosModule } from './metodos-pagos/metodos-pagos.module';
 import { PromocionesModule } from './promociones/promociones.module';
 
+
 @Module({
   imports: [
     // Configuración de base de datos con logging mejorado

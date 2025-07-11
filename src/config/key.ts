@@ -17,7 +17,7 @@ const env = {
 
   // App
   APP_PORT: 3000,
-  NODE_ENV: 'development', // o 'development'
+  NODE_ENV: 'production', // o 'development'
 
   // Encriptación
   ENCRYPTION_ALGORITHM: 'aes-256-cbc',
@@ -50,6 +50,6 @@ export const key = {
   app: {
     port: env.APP_PORT,
     env: env.NODE_ENV,
-    pid: process.pid // Solo este depende del entorno de ejecución real
+    pid: process.pid 
   }
 };

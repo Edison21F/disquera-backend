@@ -17,7 +17,7 @@ import { UpdateEstadoDto } from './dto/update-estado.dto';
 export class EstadosController {
   constructor(private readonly estadosService: EstadosService) {}
 
-  @Post()
+  @Post('')
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles('Admin')
   create(@Body() createEstadoDto: CreateEstadoDto) {
