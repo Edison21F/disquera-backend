@@ -1,9 +1,9 @@
-// src/main.ts (VERSIÓN MEJORADA)
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from './modules/app.module';
 import { logger, logAppStart, logAppShutdown } from './config/logging.config';
 import { ValidationPipe } from '@nestjs/common';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { AllExceptionsFilter } from './lib/filters/all-exceptions.filter';
+import {key} from './key';
 
 async function bootstrap() {
   try {
@@ -38,7 +38,7 @@ async function bootstrap() {
 
     // CORS configurado para producción
     app.enableCors({
-      origin: process.env.NODE_ENV === 'production' 
+      origin: key.app.env === 'production' 
         ? ['https://tu-dominio.com'] // Cambia por tu dominio real
         : ['http://localhost:3000', 'http://localhost:3001'],
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -49,12 +49,12 @@ async function bootstrap() {
     // Configuración de seguridad adicional
     app.setGlobalPrefix('api');
 
-    const port = process.env.PORT ?? 3000;
+    const port = key.app.port ?? 5000;
     
     await app.listen(port);
     
     logger.info(`🎯 Aplicación corriendo en puerto ${port}`, {
-      environment: process.env.NODE_ENV || 'development',
+      environment: key.app.env || 'development',
       url: `http://localhost:${port}`,
       apiPrefix: 'api',
     });
@@ -110,7 +110,7 @@ process.on('unhandledRejection', (reason, promise) => {
   });
   
   // En producción, cerrar el proceso después de loggear
-  if (process.env.NODE_ENV === 'production') {
+  if (key.app.env === 'production') {
     setTimeout(() => {
       logger.error('🔥 Cerrando proceso debido a unhandled rejection');
       process.exit(1);
@@ -142,7 +142,7 @@ process.on('warning', (warning) => {
 });
 
 // Monitoreo de memoria (solo en producción)
-if (process.env.NODE_ENV === 'production') {
+if (key.app.env === 'production') {
   setInterval(() => {
     const memoryUsage = process.memoryUsage();
     const cpuUsage = process.cpuUsage();

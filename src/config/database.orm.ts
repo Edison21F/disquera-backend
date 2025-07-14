@@ -1,6 +1,6 @@
 // src/config/database.orm.ts (VERSIÓN MEJORADA)
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { key } from './key';
+import { key } from '../key';
 import { DatabaseLogger } from './database-logger';
 
 const isDevelopment = key.app.env === 'development';
