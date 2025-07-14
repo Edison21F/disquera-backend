@@ -11,7 +11,7 @@ export const mongooseConfig: MongooseModuleOptions = {
   dbName: 'indiec_metadata',
   connectionFactory: (connection) => {
     connection.on('connected', () => {
-      console.log('✅ Conexión con MongoDB exitosa');
+      
     });
     connection.on('error', (error) => {
       console.error('❌ Error de conexión con MongoDB:', error.message);

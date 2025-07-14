@@ -59,7 +59,7 @@ async function bootstrap() {
       apiPrefix: 'api',
     });
     
-    console.log(`🚀 Servidor iniciado en: http://localhost:${port}/api`);
+    
     
     // Graceful shutdown
     const gracefulShutdown = (signal: string) => {

@@ -28,7 +28,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponse> {
-  console.log('[LOGIN] Intento de login:', loginDto.correo);
+  
 
   const user = await this.usersService.validateUser(loginDto.correo, loginDto.contrasena);
 
@@ -37,8 +37,6 @@ export class AuthService {
     throw new UnauthorizedException('Credenciales inválidas');
   }
 
-  // Si pasa, continúa
-  console.log('[LOGIN] Usuario autenticado:', user.correo);
 
   const payload: JwtPayload = {
     sub: user.id_usuario,
